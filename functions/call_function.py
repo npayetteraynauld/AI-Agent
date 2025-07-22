@@ -1,7 +1,7 @@
-from get_file_content import get_file_content
-from get_files_info import get_files_info
-from run_python import run_python_file
-from write_file import write_file
+from functions.get_file_content import get_file_content
+from functions.get_files_info import get_files_info
+from functions.run_python import run_python_file
+from functions.write_file import write_file
 from google import genai
 from google.genai import types
 
@@ -14,10 +14,8 @@ def call_function(function_call_part, verbose=False):
 
     function_name = function_call_part.name
     function_result = ""
-    function_args = {"working_directory": "./calculator"}
-
-    for key, value in function_call_part.args.items():
-        function_args[key] = value
+    function_args = dict(function_call_part.args) if function_call_part.args else {}
+    function_args["working_directory"] = "./calculator"
 
     match function_name:
         case "get_files_info":
@@ -32,12 +30,13 @@ def call_function(function_call_part, verbose=False):
             return types.Content(
                 role="tool",
                 parts=[
-                    types.Part.from_functions_response(
+                    types.Part.from_function_response(
                         name=function_name,
                         response={"error": f"Unknown function: {function_name}"},
                     )
                 ],
             )
+    
     
     return types.Content(
         role="tool",
